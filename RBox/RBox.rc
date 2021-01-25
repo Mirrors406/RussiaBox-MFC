@@ -90,6 +90,7 @@ IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 IDR_TOOLBAR1 TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_START
+    BUTTON      ID_PAUSE
 END
 
 IDR_MAINFRAME TOOLBAR 16, 15
@@ -117,6 +118,7 @@ BEGIN
     POPUP "ÓÎÏ·"
     BEGIN
         MENUITEM "¿ªÊ¼",                          ID_START
+        MENUITEM "ÔÝÍ£",                          ID_PAUSE
     END
 END
 

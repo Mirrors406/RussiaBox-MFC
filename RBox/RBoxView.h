@@ -69,6 +69,7 @@ public:
 	void DrawWillBox(CDC * pDC);
 	void DrawText(CDC * pDC);
 	afx_msg void OnStart();
+	afx_msg void OnPause();
 	void boxCreate();
 	void boxMove(int iKey);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
@@ -77,6 +78,7 @@ public:
 	void boxLineDel();
 	bool gameOver();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	void rootAdmin(int iKey);
 };
 
 #ifndef _DEBUG  // RBoxView.cpp 中的调试版本

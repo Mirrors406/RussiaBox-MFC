@@ -27,6 +27,7 @@ BEGIN_MESSAGE_MAP(CRBoxView, CView)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
 	ON_COMMAND(ID_START, &CRBoxView::OnStart)
+	ON_COMMAND(ID_PAUSE, &CRBoxView::OnPause)
 	ON_WM_TIMER()
 	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
@@ -221,7 +222,7 @@ void CRBoxView::DrawText(CDC * pDC)
 	pDC->SetBkMode(TRANSPARENT);	//设置字体背景为透明
 
 	pDC->SetTextColor(RGB(150, 150, 150)); 
-	pDC->TextOut(410, 25, _T("下一个方块")); 
+	pDC->TextOut(410, 25, _T("下一个方块"));
 
 	CString strScore;
 	strScore.Format(_T("分数：%d 分"), m_iScore);
@@ -305,6 +306,22 @@ void CRBoxView::OnStart()
 
 
 
+// 暂停游戏
+//
+void CRBoxView::OnPause()
+{
+	// TODO:  在此添加命令处理程序代码
+
+	if (m_bisGaming)
+		KillTimer(1);
+	else
+		SetTimer(1, m_iSpeed, NULL);
+
+	m_bisGaming = !m_bisGaming;
+}
+
+
+
 // 创建方块 
 //
 void CRBoxView::boxCreate()		//赋值下落方块，产生下一方块
@@ -366,34 +383,37 @@ void CRBoxView::boxCreate()		//赋值下落方块，产生下一方块
 //
 void CRBoxView::boxMove(int iKey)
 {
-	bool bisHit = false;//碰撞状态
-
-	switch (iKey)
+	if (m_bisGaming)
 	{
-	case KEY_UP:
-		boxHitJudge(m_boxNow, KEY_UP, m_potNow);
-		break; 
+		bool bisHit = false;//碰撞状态
 
-	case KEY_DOWN:
-		bisHit = boxHitJudge(m_boxNow, KEY_DOWN, m_potNow);
-		if (bisHit == true)		//若为下边界碰撞
-		{	
-			boxLineDel();			//判断消行
-			boxCreate();		//产生新下落方块和下一方块
-			m_bisEnd = gameOver();	//游戏是否结束
+		switch (iKey)
+		{
+		case KEY_UP:
+			boxHitJudge(m_boxNow, KEY_UP, m_potNow);
+			break; 
+
+		case KEY_DOWN:
+			bisHit = boxHitJudge(m_boxNow, KEY_DOWN, m_potNow);
+			if (bisHit == true)		//若为下边界碰撞
+			{	
+				boxLineDel();			//判断消行
+				boxCreate();		//产生新下落方块和下一方块
+				m_bisEnd = gameOver();	//游戏是否结束
+			}
+			break;
+
+		case KEY_LEFT:
+			boxHitJudge(m_boxNow, KEY_LEFT, m_potNow);
+			break;
+
+		case KEY_RIGHT:
+			boxHitJudge(m_boxNow, KEY_RIGHT, m_potNow);
+			break;
+
+		default:
+			break;
 		}
-		break;
-
-	case KEY_LEFT:
-		boxHitJudge(m_boxNow, KEY_LEFT, m_potNow);
-		break;
-
-	case KEY_RIGHT:
-		boxHitJudge(m_boxNow, KEY_RIGHT, m_potNow);
-		break;
-
-	default:
-		break;
 	}
 }
 
@@ -727,7 +747,21 @@ void CRBoxView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		break;
 
 	case VK_SPACE:
-		OnStart();
+		OnPause();
+		break;
+
+	// 管理员操作
+	case '1':
+		rootAdmin(1);
+		break;
+	case '2':
+		rootAdmin(2);
+		break;
+	case '3':
+		rootAdmin(3);
+		break;
+	case '4':
+		rootAdmin(4);
 		break;
 
 	default:
@@ -737,4 +771,53 @@ void CRBoxView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	InvalidateRect(0, NULL);
 
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+
+// 管理员权限
+//
+void CRBoxView::rootAdmin(int iKey)
+{
+	int iRow, iCol;
+
+	for (iRow = 0; iRow < MIN_ROW_COL; iRow++)
+	{
+		for (iCol = 0; iCol < MIN_ROW_COL; iCol++)
+		{
+			m_boxWill[iRow][iCol] = false;
+		}
+	}
+	
+	switch (iKey)
+	{
+	case 1:
+		m_boxWill[0][0] = 1;	// ■□□□
+		m_boxWill[1][0] = 1;	// ■□□□
+		m_boxWill[2][0] = 1;	// ■□□□
+		m_boxWill[3][0] = 1;	// ■□□□
+		break;
+	case 2:
+		m_boxWill[0][0] = 1;	// ■■□□
+		m_boxWill[0][1] = 1;	// ■□□□
+		m_boxWill[1][0] = 1;	// ■□□□
+		m_boxWill[2][0] = 1;	// □□□□
+		break;
+	case 3:
+		m_boxWill[0][0] = 1;	// ■■□□
+		m_boxWill[1][1] = 1;	// □■□□
+		m_boxWill[0][1] = 1;	// □■□□
+		m_boxWill[2][1] = 1;	// □□□□
+		break;
+	case 4:
+		m_boxWill[0][0] = 1;	// ■■□□
+		m_boxWill[0][1] = 1;	// ■■□□
+		m_boxWill[1][0] = 1;	// □□□□
+		m_boxWill[1][1] = 1;	// □□□□
+		break;
+
+
+	default:
+		break;
+	}
+
 }
